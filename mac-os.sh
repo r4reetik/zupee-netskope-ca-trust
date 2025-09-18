@@ -7,10 +7,8 @@
 # Usage: curl -fsSL <endpoint> | sudo bash -s -- [options]
 # Or: ./mac-os.sh [options]
 # Options:
-#   -h, --help              Show help message
-#   -q, --quick             Minimal setup (keychain verify; no certifi bundle update)
-#   -d, --deep              Full setup (includes certifi bundle update)
-#   -r, --revert            Revert Netskope certificates and clean up configuration (requires sudo)
+#   -h, --help              Show this help message
+#   -r, --revert            Revert Netskope certificates and clean up configuration
 #
 
 set -uo pipefail
@@ -218,8 +216,6 @@ if [[ "$*" == *"--help"* ]] || [[ "$*" == *"-h"* ]]; then
         echo ""
         echo -e "${BOLD}${GREEN}OPTIONS:${NC}"
         echo -e "  ${YELLOW}-h, --help${NC}              Show this help message"
-        echo -e "  ${YELLOW}-q, --quick${NC}            Minimal setup (no certifi changes)"
-        echo -e "  ${YELLOW}-d, --deep${NC}             Full setup (includes certifi changes)"
         echo -e "  ${YELLOW}-r, --revert${NC}           Revert Netskope certificates and clean up configuration"
         echo ""
         echo -e "${BOLD}${GREEN}DESCRIPTION:${NC}"
@@ -229,9 +225,7 @@ if [[ "$*" == *"--help"* ]] || [[ "$*" == *"-h"* ]]; then
         echo -e "  Environment variables are automatically configured in your shell."
         echo ""
         echo -e "${BOLD}${GREEN}EXAMPLES:${NC}"
-        echo -e "  ${DIM}curl -fsSL <endpoint> | sudo bash -s -- --all${NC}"
-        echo -e "  ${DIM}curl -fsSL <endpoint> | sudo bash -s -- --bundle${NC}"  
-        echo -e "  ${DIM}curl -fsSL <endpoint> | sudo bash -s -- --verify${NC}"
+        echo -e "  ${DIM}curl -fsSL <endpoint> | sudo bash -s --${NC}"
         echo -e "  ${DIM}curl -fsSL <endpoint> | sudo bash -s -- --revert${NC}"
         echo ""
     }
