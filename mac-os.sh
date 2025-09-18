@@ -215,7 +215,7 @@ if [[ "$*" == *"--help"* ]] || [[ "$*" == *"-h"* ]]; then
         echo -e "  ${CYAN}$0 [OPTIONS]${NC}"
         echo ""
         echo -e "${BOLD}${GREEN}OPTIONS:${NC}"
-        echo -e "  ${YELLOW}-h, --help${NC}              Show this help message"
+        echo -e "  ${YELLOW}-h, --help${NC}             Show this help message"
         echo -e "  ${YELLOW}-r, --revert${NC}           Revert Netskope certificates and clean up configuration"
         echo ""
         echo -e "${BOLD}${GREEN}DESCRIPTION:${NC}"
@@ -230,6 +230,11 @@ if [[ "$*" == *"--help"* ]] || [[ "$*" == *"-h"* ]]; then
         echo ""
     }
     show_usage
+    # If invoked via a pipe (curl | bash) and exiting early, drain stdin to avoid curl error 23
+    # This consumes the remainder of the piped script so the writer (curl) doesn't hit SIGPIPE
+    if [ -p /dev/stdin ]; then
+        cat > /dev/null || true
+    fi
     exit 0
 fi
 
@@ -1511,7 +1516,8 @@ EOF
 
     # Ensure single root
     local root_count keep_root
-    root_count=$(printf "%s" "$root_hits" | grep -c . 2>/dev/null || echo 0)
+    # Use wc -l to count non-empty lines; avoids non-zero exit under pipefail
+    root_count=$(printf "%s\n" "$root_hits" | sed '/^$/d' | wc -l | tr -d ' ')
     if [ "$root_count" -eq 0 ]; then
         if sudo "$keytool_path" -importcert -trustcacerts -noprompt -keystore "$keystore_path" -storepass "$storepass" -alias "$alias_root" -file "$root_cert_file" >/dev/null 2>&1; then
             root_action="added"
@@ -1532,7 +1538,8 @@ EOF
 
     # Ensure single intermediate
     local inter_count keep_inter
-    inter_count=$(printf "%s" "$inter_hits" | grep -c . 2>/dev/null || echo 0)
+    # Use wc -l to count non-empty lines; avoids non-zero exit under pipefail
+    inter_count=$(printf "%s\n" "$inter_hits" | sed '/^$/d' | wc -l | tr -d ' ')
     if [ "$inter_count" -eq 0 ]; then
         if sudo "$keytool_path" -importcert -trustcacerts -noprompt -keystore "$keystore_path" -storepass "$storepass" -alias "$alias_inter" -file "$inter_cert_file" >/dev/null 2>&1; then
             inter_action="added"
